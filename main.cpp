@@ -71,7 +71,7 @@ int RST   = 0;
 sf_t sf = SF7;
 
 // Set center frequency
-uint32_t  freq = 868100000; // in Mhz! (868.1)
+uint32_t  freq = 869400000; // in Mhz! (869.4)
 
 // Set location
 float lat=0.0;
@@ -85,9 +85,9 @@ static char description[64] = "";                        /* used for free form d
 
 // define servers
 // TODO: use host names and dns
-#define SERVER1 "54.72.145.119"    // The Things Network: croft.thethings.girovito.nl
+//#define SERVER1 "54.72.145.119"    // The Things Network: croft.thethings.girovito.nl
 //#define SERVER2 "192.168.1.10"      // local
-#define PORT 1700                   // The port on which to send data
+//#define PORT 1700                   // The port on which to send data
 
 // #############################################
 // #############################################
@@ -203,7 +203,7 @@ void writeRegister(byte addr, byte value)
     unselectreceiver();
 }
 
-
+//LOOK HERE
 boolean receivePkt(char *payload)
 {
 
@@ -215,12 +215,12 @@ boolean receivePkt(char *payload)
     cp_nb_rx_rcv++;
 
     //  payload crc: 0x20
-    if((irqflags & 0x20) == 0x20)
+    /*if((irqflags & 0x20) == 0x20)
     {
         printf("CRC error\n");
         writeRegister(REG_IRQ_FLAGS, 0x20);
         return false;
-    } else {
+    } else {*/
 
         cp_nb_rx_ok++;
 
@@ -234,7 +234,7 @@ boolean receivePkt(char *payload)
         {
             payload[i] = (char)readRegister(REG_FIFO);
         }
-    }
+    
     return true;
 }
 
@@ -313,7 +313,7 @@ void SetupLoRa()
 
 }
 
-void sendudp(char *msg, int length) {
+/*void sendudp(char *msg, int length) {
 
 //send the update
 #ifdef SERVER1
@@ -331,17 +331,17 @@ void sendudp(char *msg, int length) {
         die("sendto()");
     }
 #endif
-}
+}*/
 
-void sendstat() {
+/*void sendstat() {
 
-    static char status_report[STATUS_SIZE]; /* status report as a JSON object */
+    static char status_report[STATUS_SIZE]; /* status report as a JSON object 
     char stat_timestamp[24];
     time_t t;
 
     int stat_index=0;
 
-    /* pre-fill the data buffer with fixed fields */
+    /* pre-fill the data buffer with fixed fields 
     status_report[0] = PROTOCOL_VERSION;
     status_report[3] = PKT_PUSH_DATA;
 
@@ -354,37 +354,37 @@ void sendstat() {
     status_report[10] = (unsigned char)ifr.ifr_hwaddr.sa_data[4];
     status_report[11] = (unsigned char)ifr.ifr_hwaddr.sa_data[5];
 
-    /* start composing datagram with the header */
-    uint8_t token_h = (uint8_t)rand(); /* random token */
-    uint8_t token_l = (uint8_t)rand(); /* random token */
+    /* start composing datagram with the header 
+    uint8_t token_h = (uint8_t)rand(); /* random token 
+    uint8_t token_l = (uint8_t)rand(); /* random token 
     status_report[1] = token_h;
     status_report[2] = token_l;
     stat_index = 12; /* 12-byte header */
 
-    /* get timestamp for statistics */
+    /* get timestamp for statistics 
     t = time(NULL);
     strftime(stat_timestamp, sizeof stat_timestamp, "%F %T %Z", gmtime(&t));
 
     int j = snprintf((char *)(status_report + stat_index), STATUS_SIZE-stat_index, "{\"stat\":{\"time\":\"%s\",\"lati\":%.5f,\"long\":%.5f,\"alti\":%i,\"rxnb\":%u,\"rxok\":%u,\"rxfw\":%u,\"ackr\":%.1f,\"dwnb\":%u,\"txnb\":%u,\"pfrm\":\"%s\",\"mail\":\"%s\",\"desc\":\"%s\"}}", stat_timestamp, lat, lon, (int)alt, cp_nb_rx_rcv, cp_nb_rx_ok, cp_up_pkt_fwd, (float)0, 0, 0,platform,email,description);
     stat_index += j;
-    status_report[stat_index] = 0; /* add string terminator, for safety */
+    status_report[stat_index] = 0; /* add string terminator, for safety 
 
-    printf("stat update: %s\n", (char *)(status_report+12)); /* DEBUG: display JSON stat */
+    printf("stat update: %s\n", (char *)(status_report+12)); /* DEBUG: display JSON stat 
 
     //send the update
     sendudp(status_report, stat_index);
 
-}
+}*/
 
 void receivepacket() {
 
-    long int SNR;
-    int rssicorr;
+    //long int SNR;
+    //int rssicorr;
 
     if(digitalRead(dio0) == 1)
     {
         if(receivePkt(message)) {
-            byte value = readRegister(REG_PKT_SNR_VALUE);
+            /*byte value = readRegister(REG_PKT_SNR_VALUE);
             if( value & 0x80 ) // The SNR sign bit is 1
             {
                 // Invert and divide by 4
@@ -407,22 +407,26 @@ void receivepacket() {
             printf("RSSI: %d, ",readRegister(0x1B)-rssicorr);
             printf("SNR: %li, ",SNR);
             printf("Length: %i",(int)receivedbytes);
-            printf("\n");
-
-            int j;
-            j = bin_to_b64((uint8_t *)message, receivedbytes, (char *)(b64), 341);
+            printf("\n");*/
+			
+			//Package into b64
+            /*int j;
+            j = bin_to_b64((uint8_t *)message, receivedbytes, (char *)(b64), 341);*/
+			
+			//SEND MESSAGE MQTT HERE
+			
             //fwrite(b64, sizeof(char), j, stdout);
 
-            char buff_up[TX_BUFF_SIZE]; /* buffer to compose the upstream packet */
-            int buff_index=0;
+            //char buff_up[TX_BUFF_SIZE]; /* buffer to compose the upstream packet */
+            //int buff_index=0;
 
             /* gateway <-> MAC protocol variables */
             //static uint32_t net_mac_h; /* Most Significant Nibble, network order */
             //static uint32_t net_mac_l; /* Least Significant Nibble, network order */
 
             /* pre-fill the data buffer with fixed fields */
-            buff_up[0] = PROTOCOL_VERSION;
-            buff_up[3] = PKT_PUSH_DATA;
+            //buff_up[0] = PROTOCOL_VERSION;
+            //buff_up[3] = PKT_PUSH_DATA;
 
             /* process some of the configuration variables */
             //net_mac_h = htonl((uint32_t)(0xFFFFFFFF & (lgwm>>32)));
@@ -430,28 +434,28 @@ void receivepacket() {
             //*(uint32_t *)(buff_up + 4) = net_mac_h;
             //*(uint32_t *)(buff_up + 8) = net_mac_l;
 
-            buff_up[4] = (unsigned char)ifr.ifr_hwaddr.sa_data[0];
+            /*buff_up[4] = (unsigned char)ifr.ifr_hwaddr.sa_data[0];
             buff_up[5] = (unsigned char)ifr.ifr_hwaddr.sa_data[1];
             buff_up[6] = (unsigned char)ifr.ifr_hwaddr.sa_data[2];
             buff_up[7] = 0xFF;
             buff_up[8] = 0xFF;
             buff_up[9] = (unsigned char)ifr.ifr_hwaddr.sa_data[3];
             buff_up[10] = (unsigned char)ifr.ifr_hwaddr.sa_data[4];
-            buff_up[11] = (unsigned char)ifr.ifr_hwaddr.sa_data[5];
+            buff_up[11] = (unsigned char)ifr.ifr_hwaddr.sa_data[5];*/
 
             /* start composing datagram with the header */
-            uint8_t token_h = (uint8_t)rand(); /* random token */
-            uint8_t token_l = (uint8_t)rand(); /* random token */
-            buff_up[1] = token_h;
+            //uint8_t token_h = (uint8_t)rand(); /* random token */
+            //uint8_t token_l = (uint8_t)rand(); /* random token */
+           /* buff_up[1] = token_h;
             buff_up[2] = token_l;
-            buff_index = 12; /* 12-byte header */
+            buff_index = 12; /* 12-byte header 
 
             // TODO: tmst can jump is time is (re)set, not good.
             struct timeval now;
             gettimeofday(&now, NULL);
             uint32_t tmst = (uint32_t)(now.tv_sec*1000000 + now.tv_usec);
 
-            /* start of JSON structure */
+            /* start of JSON structure 
             memcpy((void *)(buff_up + buff_index), (void *)"{\"rxpk\":[", 9);
             buff_index += 9;
             buff_up[buff_index] = '{';
@@ -464,7 +468,7 @@ void receivepacket() {
             buff_index += 9;
             memcpy((void *)(buff_up + buff_index), (void *)",\"modu\":\"LORA\"", 14);
             buff_index += 14;
-            /* Lora datarate & bandwidth, 16-19 useful chars */
+            /* Lora datarate & bandwidth, 16-19 useful chars 
             switch (sf) {
             case SF7:
                 memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF7", 12);
@@ -507,22 +511,22 @@ void receivepacket() {
             j = bin_to_b64((uint8_t *)message, receivedbytes, (char *)(buff_up + buff_index), 341);
             buff_index += j;
             buff_up[buff_index] = '"';
-            ++buff_index;
+            ++buff_index; 
 
-            /* End of packet serialization */
+            /* End of packet serialization 
             buff_up[buff_index] = '}';
             ++buff_index;
             buff_up[buff_index] = ']';
             ++buff_index;
-            /* end of JSON datagram payload */
+            /* end of JSON datagram payload 
             buff_up[buff_index] = '}';
             ++buff_index;
             buff_up[buff_index] = 0; /* add string terminator, for safety */
 
-            printf("rxpk update: %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+            //printf("rxpk update: %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
 
             //send the messages
-            sendudp(buff_up, buff_index);
+            //sendudp(buff_up, buff_index);
 
             fflush(stdout);
 
@@ -547,7 +551,7 @@ int main () {
 
     SetupLoRa();
 
-    if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+    /*if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {
         die("socket");
     }
@@ -557,17 +561,17 @@ int main () {
 
     ifr.ifr_addr.sa_family = AF_INET;
     strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);  // can we rely on eth0?
-    ioctl(s, SIOCGIFHWADDR, &ifr);
+    ioctl(s, SIOCGIFHWADDR, &ifr);*/
 
     /* display result */
-    printf("Gateway ID: %.2x:%.2x:%.2x:ff:ff:%.2x:%.2x:%.2x\n",
+   /* printf("Gateway ID: %.2x:%.2x:%.2x:ff:ff:%.2x:%.2x:%.2x\n",
            (unsigned char)ifr.ifr_hwaddr.sa_data[0],
            (unsigned char)ifr.ifr_hwaddr.sa_data[1],
            (unsigned char)ifr.ifr_hwaddr.sa_data[2],
            (unsigned char)ifr.ifr_hwaddr.sa_data[3],
            (unsigned char)ifr.ifr_hwaddr.sa_data[4],
            (unsigned char)ifr.ifr_hwaddr.sa_data[5]);
-
+	*/
     printf("Listening at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
     printf("------------------\n");
 
@@ -579,7 +583,7 @@ int main () {
         uint32_t nowseconds = (uint32_t)(nowtime.tv_sec);
         if (nowseconds - lasttime >= 30) {
             lasttime = nowseconds;
-            sendstat();
+            //sendstat();
             cp_nb_rx_rcv = 0;
             cp_nb_rx_ok = 0;
             cp_up_pkt_fwd = 0;
