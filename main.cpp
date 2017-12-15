@@ -425,6 +425,9 @@ void receivepacket() {
 			
 			//SEND MESSAGE MQTT HERE
 			
+			MQTTClient_message pubmsg = MQTTClient_message_initializer;
+			MQTTClient_deliveryToken token;
+			
 			pubmsg.payload = message;
 			pubmsg.payloadlen = strlen(message);
 			pubmsg.qos = QOS;
